@@ -1,0 +1,41 @@
+
+Sfold Executable Code for Academic Users, Version 2.2-20101117
+  <Partition function and statistical sampling module>
+
+ 1 G
+ 2 G
+ 3 G
+ 4 G
+ 5 C
+ 6 U
+ 7 A
+ 8 U
+ 9 A
+ 10 G
+ 67 A
+ 68 G
+ 69 C
+ 70 U
+ 71 C
+ 72 C
+ 73 A
+ 74 C
+ 75 C
+ 76 A
+ 
+ Random seed =  123456
+ Sequence length n =  76
+ Number of structures in a sample =  1000
+ Reverse complement = F
+ Length of antisense oligo =  20
+ Maximum distance between paired bases =  75
+ Additional constraint file = none
+ 
+ U0 =  1.93514
+ scaled U(1,n) =  0.014113631150366332
+ -RT ln(U(1,n))= -28.297589225636652
+ Time for PFs =  0.062225
+ Time for sampling =  0.7792101
+ Time for PFs & sampling =  0.8414351
+ Time for output & others =  0.09057975
+ Total cpu time =  0.9320148

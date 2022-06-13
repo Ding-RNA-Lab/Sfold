@@ -1,0 +1,54 @@
+#!/bin/sh
+
+#
+# Run Sfold on a short tRNA sequence and compare results to 
+# those derived from our development machine
+#
+
+LOC=`dirname $0`
+CONTROLDIR="$LOC/out.76"
+ERRORLOG="$LOC/testrun.log"
+rm -rf $LOC/output
+
+set -a
+. $LOC/../sfoldenv
+LD_LIBRARY_PATH=$SFOLDLIB:$LD_LIBRARY_PATH
+# For Mac OSX, use DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH
+DYLD_LIBRARY_PATH=$SFOLDLIB:$DYLD_LIBRARY_PATH
+$PATH_PERL $SFOLDBIN/sfold.pl -r `cat $LOC/seed` -o $LOC/output $LOC/seq.dat > $ERRORLOG 2>&1
+
+errlog=`grep -i error $ERRORLOG`
+if test "$errlog" != ""; then
+  echo " Sfold test run result: FAILED"
+  echo " Check error log in $ERRORLOG"
+  exit
+fi
+
+# function to compare the two files/directories specified in
+# the arguments
+compare_out() {
+  TESTDIFF=`diff -rb "$1" "$2"`
+  if test "$TESTDIFF" != ""; then
+    echo "diff -rb \"$1\" \"$2\"" >> $ERRORLOG
+    diff -rb "$1" "$2" >> $ERRORLOG 2>&1
+    echo " Sfold test run result: FAILED"
+    echo " Check error log in $ERRORLOG"
+    exit
+  fi
+}
+
+compare_out "$LOC/output/bp.out" "$CONTROLDIR/bp.out"
+compare_out "$LOC/output/fe.out" "$CONTROLDIR/fe.out"
+compare_out "$LOC/output/sstrand.out" "$CONTROLDIR/sstrand.out"
+compare_out "$LOC/output/ecentroid.bp" "$CONTROLDIR/ecentroid.bp"
+compare_out "$LOC/output/clusters" "$CONTROLDIR/clusters"
+grep -v Version $LOC/output/sclass.out > $LOC/sclass1.out
+grep -v Version $CONTROLDIR/sclass.out > $LOC/sclass2.out
+compare_out "$LOC/sclass1.out" "$LOC/sclass2.out"
+rm -f $LOC/sclass1.out $LOC/sclass2.out
+
+echo " Sfold test run result: PASSED"
+
+# clean up temp files
+rm -rf $LOC/output
+rm -f $ERRORLOG

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+LOC=`dirname $0`
+
+set -a
+. $LOC/../sfoldenv
+LD_LIBRARY_PATH=$SFOLDLIB:$LD_LIBRARY_PATH
+# For Mac OSX, use DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH
+DYLD_LIBRARY_PATH=$SFOLDLIB:$DYLD_LIBRARY_PATH
+exec $PATH_PERL $SFOLDBIN/sfold.pl $@

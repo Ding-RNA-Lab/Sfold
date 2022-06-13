@@ -1,0 +1,57 @@
+The Sfold partition function and statistical sampling module makes
+use of the Mersenne Twister (MT) random number generator. Please
+see http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html for
+more info. A copy of the MT's copyright notice is attached below.
+
+Paper reference:
+M. Matsumoto and T. Nishimura (1998) Mersenne Twister: A 
+623-dimensionally equidistributed uniform pseudorandom number 
+generator. ACM Trans. on Modeling and Computer Simulation Vol. 8,
+No. 1, 3-30.
+
+c
+c  A C-program for MT19937, with initialization improved 2002/1/26.
+c  Coded by Takuji Nishimura and Makoto Matsumoto.
+c
+c  Before using, initialize the state by using init_genrand(seed)  
+c  or init_by_array(init_key, key_length).
+c
+c  Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+c  All rights reserved.                          
+c  Copyright (C) 2005, Mutsuo Saito,
+c  All rights reserved.                          
+c
+c  Redistribution and use in source and binary forms, with or without
+c  modification, are permitted provided that the following conditions
+c  are met:
+c
+c    1. Redistributions of source code must retain the above copyright
+c       notice, this list of conditions and the following disclaimer.
+c
+c    2. Redistributions in binary form must reproduce the above copyright
+c       notice, this list of conditions and the following disclaimer in the
+c       documentation and/or other materials provided with the distribution.
+c
+c    3. The names of its contributors may not be used to endorse or promote 
+c       products derived from this software without specific prior written 
+c       permission.
+c
+c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+c  A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+c  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+c  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+c  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+c  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+c  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+c  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+c  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+c
+c
+c  Any feedback is very welcome.
+c  http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+c  email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
+c
+c-----------------------------------------------------------------------
+c  FORTRAN77 translation by Tsuyoshi TADA. (2005/12/19)
