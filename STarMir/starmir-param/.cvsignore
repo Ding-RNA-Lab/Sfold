@@ -1,0 +1,14 @@
+.hg
+.svn
+.hgignore
+.cvsignore
+bsite*.txt
+CLIP-*
+logitCoef-old
+Prob-*.txt
+*.sav
+*.sav2
+*.sav3
+testcase-*.txt
+*~
+Seq

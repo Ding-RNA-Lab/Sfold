@@ -1,0 +1,4 @@
+The utility program 'bprob' included in this package makes use of the
+Cephes Math Library. Please go to the library's website at
+http://www.netlib.org/cephes/ for more information. The author claimed
+no restrictions on the use of the material posted to the web.

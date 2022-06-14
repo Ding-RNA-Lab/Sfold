@@ -1,0 +1,4 @@
+MIT seeds: G/B 12-17	Pos_gene	Neg_gene	Pos_site	Neg_site	Pos_site_enrichment	Odds_ratio
+present	1261	12239	29976	9870592	 1.0718	 1.0873
+absent	1295	12246	138936	49742432	 0.9858	 0.9197
+Total Sites in Pos/Neg Sets	168912	59613024

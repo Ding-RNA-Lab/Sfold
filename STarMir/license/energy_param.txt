@@ -1,0 +1,11 @@
+Please refer to the following papers for details of the thermodynamic 
+parameters included in this package:
+
+Xia, T., SantaLucia, J. Jr, Burkard, M.E., Kierzek, R., Schroeder, S.J., 
+Jiao, X. et al. (1998). Thermodynamic parameters for an expanded  
+nearest-neighbor model for formation of RNA duplexes with Watson-Crick 
+base pairs. Biochemistry 37, 14719-14735.
+
+Mathews, D.H., Sabina, J., Zuker, M. & Turner, D.H. (1999). Expanded 
+sequence dependence of thermodynamic parameters improves prediction of 
+RNA secondary structure. J. Mol. Biol. 288, 911-940.

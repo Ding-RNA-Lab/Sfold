@@ -1,0 +1,7 @@
+MIT seeds: G/B GU count, name	Pos_gene	Neg_gene	Pos_site	Neg_site	Pos_site_enrichment	Odds_ratio
+8mer	   0 GU	466	7199	1732	41084	 2.5514	 2.7436
+7mer-m8	   0 GU	675	9695	2837	118156	 1.4532	 1.5530
+7mer-A1	   0 GU	582	9278	2115	88386	 1.4482	 1.5179
+6mer	   0 GU	892	11219	4187	284281	 0.8914	 0.8519
+offset-6mer  0 GU	943	11531	4845	419248	 0.6994	 0.5654
+Total Sites in Pos/Neg Sets	15716	951155

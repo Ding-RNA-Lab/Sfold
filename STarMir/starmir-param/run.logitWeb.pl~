@@ -1,0 +1,230 @@
+#!/usr/bin/perl
+
+# usage: >perl run.logit.pl <working directory> <param directory> <species> <trainSpecies> <cdsBegin> <cdsEnd>
+#                             <target region> <accession number search used>
+#
+# The script is used for computation of conservation score and relative percentage 
+# of siteBegin in each component, then based on the features computed, functional 
+# probabilities (linear and nonlinear) of each binding site are computed using 
+# a logistic prediction model.
+#
+# adapted for web (war) 8/23/2011
+#
+# 10/11/2011 (war)
+# add adaptations to handle the case where no conservation values are available
+# this involved adding an additional parameter for the target sequence name
+# so the conservation file could be searched for it.
+# and adjustments to the parameters passed to the logistic regression script
+# in both cases.
+#
+# 12/5/2011 (war)
+# added parameter for used accession number to access our database of sequences
+# and some additional modifications to reflect changes in the R script
+# per suggestion from chaochun changed grep to awk in has_consv function
+# to decrease running time.
+#
+# TODO.  Do something to deal with the explosion of arguments to this script
+#
+# 2013-4-29 ccli
+# modification for the addition of worm.  Principally, the additon of a variable
+# $componetModel so that the model for worm, which is only defined for 3'UTR may
+# be applied to all regions.
+#
+
+use warnings;
+use strict;
+
+use File::Basename;
+use Carp::Assert;
+
+print STDERR "\nEntering $0\n";
+print STDERR "Arguments:\n\t" if DEBUG;
+print STDERR join("\n\t", @ARGV) . "\n" if DEBUG;
+
+# holders for arguments to script
+my $workDir;
+my $basePath;
+my $species;
+my $trainSpecies;
+my $cdsBegin;
+my $cdsEnd;
+my $target_seqname;
+my $targetRegion; 
+my $accCase;
+
+# Globals
+my $commandString;
+my @components;
+my $useConsvData;
+
+
+if (scalar @ARGV >= 7) {
+    # making the last two parameters optional
+    # for compatibility with current script
+    $workDir= $ARGV[0];
+    $basePath = $ARGV[1];
+    $species = $ARGV[2];
+    $trainSpecies = $ARGV[3];
+    $cdsBegin = $ARGV[4];
+    $cdsEnd = $ARGV[5];
+    $target_seqname = $ARGV[6];
+    if (defined $ARGV[7]) {
+	$targetRegion = $ARGV[7];
+    }
+    if (defined $ARGV[8]) {
+	$accCase = $ARGV[8];
+    }
+}
+else {
+    die("usage: >perl run.logitWeb.pl <working directory> <param directory> <species> <trainSpecies>\n <cdsBegin> <cdsEnd> <target sequence name> <target region> <accession number search used>\n");
+} # end if else
+
+my $Rargs = "--slave --no-save --no-restore --no-environ --silent --args";
+my $RexePath = "/usr/bin/";
+$RexePath = "" if !-e "${RexePath}R";
+
+# the file of conservation score for species "mouse" and "human" legal options
+my $conserFile = "${basePath}/logitCoef/Refseq-conserScore-$species.txt";
+
+print STDERR "\tConservation scores: $conserFile\n" if DEBUG;
+
+print STDERR "Target Region: $targetRegion\n" if DEBUG;
+
+# adjust cdsBegin and cdsEnd 
+# set components to report hits for
+#
+# if we looked up the sequence in our own database, we will use our own
+# region delimiters we signal this by setting the values of cdsBegin
+# and cdsEnd to -1
+if (defined $accCase and $accCase == 1) {
+    $cdsBegin = -1;
+    $cdsEnd = -1;
+    @components = ("3pUTR", "CDS", "5pUTR");
+    $useConsvData = has_consv($target_seqname, $conserFile);
+}
+elsif (defined $targetRegion and ($targetRegion eq 'mRNA' or $targetRegion eq 'Full')) {
+    # if we are using the full sequence, keep the users
+    # cds start and end, and consider all regions
+    @components = ("3pUTR", "CDS", "5pUTR");
+    $useConsvData = 0;
+}
+elsif (defined $targetRegion and $targetRegion eq '5UTR') {
+    # for other cases, set cds start and end to
+    # -1 and only consider one region
+    $cdsBegin = -1;
+    $cdsEnd = -1;
+    @components = ('5pUTR');
+    $useConsvData = 0;
+}
+elsif (defined $targetRegion and $targetRegion eq 'CDS') {
+    $cdsBegin = -1;
+    $cdsEnd = -1;
+    @components = ('CDS');
+    $useConsvData = 0;
+}
+elsif (defined $targetRegion and $targetRegion eq '3pUTR') {
+    $cdsBegin = -1;
+    $cdsEnd = -1;
+    @components = ('3pUTR');
+    $useConsvData = 0;
+} # end if elsif else define region case
+
+print STDERR "Use conservation data: $useConsvData\n" if DEBUG;
+
+my @types = ("seed","seedless");
+
+if (DEBUG) {
+    my $tmpstring = 'Components:' . join(':', @components) . "\n";
+    print STDERR $tmpstring;
+}
+
+foreach my $type (@types) {
+	foreach my $component (@components) {
+
+	    print STDERR "In main loop, type=$type, component=$component\n";
+
+		my $bindsiteBase = "bsite-$type-$component-$trainSpecies.txt";
+		my $bindsiteFile = "${workDir}$bindsiteBase";
+
+		#  add the variable $componentModel to determine which model is used. (ccliu 04/24/2013)
+		#  the model for worm 3pUTR will be used for worm 5pUTR and CDS prediction.
+		#  the $component in file name $logitCoefFile and $enrichScoreFile were also changed to $componentModel.
+		my $componentModel = $component;
+		if (($trainSpecies eq "worm") and ($component ne "3pUTR")) { 
+		    $componentModel = "3pUTR";
+		}
+		my $enrichScoreFile = "${basePath}/logitCoef/enrichment_score-$type-$componentModel-$trainSpecies.txt";
+
+		# determine if binding site file exits.  It will not be created
+		#   there are no binding sites for a given component/type
+		#   best way I could figure to signal this script there was no 
+		#   data
+
+		if ( -e $bindsiteFile) {
+
+		    print STDERR "Binding site file: $bindsiteFile\n"; 
+
+		    if ($useConsvData != 0) {
+			my $logitCoefFile = "${basePath}/logitCoef/logReg-coef-$type-$componentModel-$trainSpecies.txt";
+
+			print STDERR "Logit Coefficent file: $logitCoefFile\n";
+
+			$commandString = "${RexePath}R $Rargs bindsiteFile=$bindsiteFile conserFile=$conserFile enrichScoreFile=$enrichScoreFile logitCoefFile=$logitCoefFile cdsBegin=$cdsBegin cdsEnd=$cdsEnd component=$component type=$type < ${basePath}/cnsvScore_prediction.R";
+		    }
+		    else {
+			# if no conservation file, we use a different coefficent file and 
+			# eliminate the conservation file as a parameter.
+			my $logitCoefFile = "${basePath}/logitCoef/logReg-coef-$type-$componentModel-$trainSpecies-noConser.txt";
+			print STDERR "Logit Coefficent file: $logitCoefFile\n";
+
+			$commandString = "${RexePath}R $Rargs bindsiteFile=$bindsiteFile enrichScoreFile=$enrichScoreFile logitCoefFile=$logitCoefFile cdsBegin=$cdsBegin cdsEnd=$cdsEnd component=$component type=$type < ${basePath}/cnsvScore_prediction.R";
+		    } # end if else conservation data exist
+
+
+		    print STDERR "Executing:\n\t $commandString\n" if DEBUG;
+
+		    system($commandString);
+
+		    die("$commandString:\n\t Failed to execute\n") if ($? == -1);
+		}
+		else {
+		    print STDERR "$bindsiteFile not found\n";
+		} # end if else binding site file found
+	} # end foreach component
+} # end foreach type
+
+print STDERR "Exiting $0\n" if DEBUG;
+
+exit 0;
+
+# has_consv(<target name>, <conservation filename>)
+# parameters
+#        The name of the target mRNA
+#        The name of the conservation file
+#          note file is specific to species
+#          That determination is made before
+#          this subroutine is called
+# return
+#        true if the mRNA is in the conservation
+#             file, 0 otherwise.
+#
+sub has_consv
+{
+    print STDERR "Entering has_consv\n" if DEBUG;
+
+    (my $targetname, my $consfilename) = @_;
+    my $ret = 0;
+
+#    my $grepresult = `grep $targetname $consfilename`;
+    my $grepresult = `awk '\$1~/$targetname/ {print \$1; exit 0}' $consfilename`;
+    if ($grepresult =~ /$targetname/) {
+	$ret = 1;
+    }
+    else {
+	$ret =  0;
+    }
+    print STDERR "Returning $ret\n" if DEBUG;
+
+    return $ret;
+    
+} # end has_consv

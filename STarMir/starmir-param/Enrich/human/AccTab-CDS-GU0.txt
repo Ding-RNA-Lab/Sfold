@@ -1,0 +1,4 @@
+UpsAcc  15
+DwsAcc  15
+UpAU   25
+DwAU   30
