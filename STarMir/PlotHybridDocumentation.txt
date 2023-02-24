@@ -1,0 +1,52 @@
+Notes regarding the plot_hybrid scripts
+
+the plot_Hybrid scripts are scripts that were use by our lab to create high quality diagrams of
+the hybridization of mRNAs and miRNAs.  They are rough "researcher" scripts, but they have served
+us well for papers and posters.
+
+William Rennie
+
+
+Using the scripts
+
+The arguments, the two scripts  plot_Hybrid_PDF.R and plot_Hybrid_PDF2.R vary only in the first
+argument.  The scripts were designed to be used in a batch environment as part of a pipeline.
+The change is to optimize the scripts for a particular pipeline.
+
+The 'Web' scripts were used on our web tool for Starmir.  I include them here as a curiosity.
+
+usage plot_Hybrid_PDF.R <Site ID> <Target Name> <miRNA Name> <site position> <Tar MisMat> <Tar Mat> <miRNA Mat> <miRNA MisMat> <dG Hybrid>
+
+The arguments are positional.  All must be present to run the script.
+
+
+Site ID -- an integer.  Used to build the output file name. (plot_Hybrid_PDF)
+Output Filename -- a string.  Used to build the output file name (plot_Hybrid_PDF2)
+
+Target Name   -- string name identifying the target mRNA or fragment
+miRNA         -- string name identifying the target mircroRNA
+site position -- integer position of the binding site relative to the mRNA or fragment
+Tar MisMat    -- string identifies the nucleitides on the target sequence that are not bound
+                 to the miRNA
+Tar Mat       -- string identifies the nucleitides on the target sequence that are bound
+                 to the miRNA
+miRNA Mat     -- string identifies the nucleitides on the miRNA that are bound
+                 to the target mRNA
+miRNA MisMat  -- string identifies the nucleitides on the miRNA that are not bound
+                 to the target mRNA
+
+The last four arguments appear in the Starmir output files in that order.  They also appear
+in RNAhybrid output files if you display the output in the compact form.
+
+dG Hybrid     -- float Delta G hybridization energy.  Used in diagram labels.
+
+
+These scripts were used in the batch processing of starmir output.  The intent is that the
+driver script takes a file of output, parses out the necessary fields and builds a call to
+the R scripts.  It will create a pdf file containing the diagram for each line in the file.
+
+The web scripts were set up to use the modified Starmir output used by our website to build output
+pages.  The pdf diagrams on the web page are created using the plotHybridWeb.R script.
+
+No special R packages are required to run the scripts, but, of course, R must be available on the machine.
+
