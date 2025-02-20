@@ -318,6 +318,10 @@ else {
 
 system("perl $base_dir/run.score.pl $workDir  $trainspecies");
 
+print "$TotalEnFname\n";
+
+system("$base_dir/format_sitelisting_3.pl $TotalEnFname > $workDir/conformation_all_sites.out");
+
 
 print STDERR "Exiting $0\n" if $debug;
 
