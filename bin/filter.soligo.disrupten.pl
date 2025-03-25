@@ -13,9 +13,17 @@ $threshold = 0.000;
 $gcp = 0;
 $gx4 = 0;
 $combinesites = 0;
+$output_file = "";
 
 &usage() if ($#ARGV == -1);
 &init();
+
+if (!$opt{o}) {
+  die "Error: you must specify an output file!";
+} else {
+  $output_file = $opt{0};
+}
+open(OUTPUTFILE, '>', $output_file) or die("could not open $output_file for output.\n");
 
 if (!$opt{s}) {
   die "Error: you must specify an input file containing accessibility profile!";
@@ -234,7 +242,7 @@ if ($combinesites) {
 
 foreach $i (@spos) {
   if (($combinesites && $sincluded{$i}==1) || $combinesites==0) {
-    printf("%5d  %s  %.3f  %5.1f%%\n", $i, $sites{$i}, $avgprob{$i}, $percent_gc{$i});
+    printf(OUTPUTFILE"%5d  %s  %.3f  %5.1f%%\n", $i, $sites{$i}, $avgprob{$i}, $percent_gc{$i});
   }
 }
 
@@ -247,7 +255,7 @@ exit;
 sub init()
 {
     use Getopt::Std;
-    my $opt_string = 'cghl:ps:t:';
+    my $opt_string = 'cghl:ps:t:o:';
     getopts( "$opt_string", \%opt ) or usage();
 
     usage() if ($opt{h});
