@@ -12,7 +12,7 @@ use warnings;
 # program paths
 $curdir = &dir_full_path(".");
 $bindir = &dir_full_path($0);
-$sfoldbin = &dir_full_path("/nfs/sfold/bin");
+$sfoldbin = &dir_full_path($0);
 $prefilter = join("", $bindir, "/filter.soligo.disrupten.pl");
 $disruptEn = join("", $bindir, "/disruptEn");
 
