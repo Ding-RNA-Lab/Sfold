@@ -240,7 +240,7 @@ sub compute_dG_switch {
   chomp $dG;
 
   # delete entire temp directory
-  #`rm -rf $tmpdirname`;
+  `rm -rf $tmpdirname`;
 
   return $dG;
 }

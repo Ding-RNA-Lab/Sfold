@@ -21,7 +21,7 @@ $output_file = "";
 if (!$opt{o}) {
   die "Error: you must specify an output file!";
 } else {
-  $output_file = $opt{0};
+  $output_file = $opt{o};
 }
 open(OUTPUTFILE, '>', $output_file) or die("could not open $output_file for output.\n");
 
@@ -101,9 +101,9 @@ for (my $i=1; $i<=$nwin; $i++) {
     next if ($thiswin =~ /GGGG/);
   }
 
-  my($percent);
+  ($percent);
   if ($gcp) {
-    my($onlyGC) = $thiswin;
+    ($onlyGC) = $thiswin;
     $onlyGC =~ s/[^GC]//g;
 
     $percent = length($onlyGC)/$sitelen*100;
@@ -120,6 +120,7 @@ for (my $i=1; $i<=$nwin; $i++) {
   push @spos, $i;
   $sites{$i} = $thiswin;
   $percent_gc{$i} = $percent;
+  print($percent);
   $avgprob{$i} = $prob;
 }
 
@@ -239,6 +240,39 @@ if ($combinesites) {
 #  }
 
 }
+
+print OUTPUTFILE <<EndOfHeader;
+~~~~~~~~~~~~~~~~Filtered output for design of antisense oligos~~~~~~~~~~~~~~~~~
+
+Column 1: starting target position
+Column 2: ending target position
+Column 3: target sequence (5p --> 3p)
+Column 4: antisense oligo (5p --> 3p)
+Column 5: GC content
+Column 6: average unpaired probability for target site nucleotides
+Column 7: binding site disruption energy (kcal/mol)
+
+FILTER CRITERIA: ("<=": less than or equal to)
+                 (">=": greater than or equal to)
+
+ A) 40% <= GC % <= 60%;
+ B) No GGGG in the target sequence;
+ C) Average unpaired probability for target site nucleotides >= threshold;
+ D) For each peak in the accessibility profile that is above the threshold
+    probability, all sites targeted to this same peak are
+    ranked by their average unpaired probability (the higher the better) and
+    at most n sites are selected for each peak, where n is determined by
+    max([width of peak/site length], 2);
+ E) Among sites satisfying criteria A-D, the top unique ones with
+    the highest average unpaired probability are listed.
+
+NOTE:
+ i) The average unpaired probability is used in filter criteria C, D and E to
+    cut down the number of reported sites in order to make the disruption
+    energy calculation manageable on our web servers.
+--------------------------------------------------------------------------------
+
+EndOfHeader
 
 foreach $i (@spos) {
   if (($combinesites && $sincluded{$i}==1) || $combinesites==0) {

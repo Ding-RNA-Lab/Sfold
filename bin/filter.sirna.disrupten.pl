@@ -3,28 +3,41 @@
 #
 # Globals
 #
-use vars qw/ %opt /;
+#use vars qw/ %opt /;
 use warnings;
+#use strict;
 
-$DEBUG=0;
+my $DEBUG=0;
+#
+# Command line options processing
+#
+use Getopt::Std;
+my $opt_string = 'cdghi:l:ps:t:o:';
+getopts( 'cdghi:l:ps:t:o:', \my %opt );
 
-$apfile = "";
-$sifile = "";
-$sitelen = 19;
-$threshold = 0.000;
-$gcp = 0;
-$nx4 = 0;
-$dsseopt = 0;
-$combinesites = 0;
-$output_file = "";
+#print (STDERR $opt{l});
+#print (STDERR $opt{o});
+#print (STDERR $opt{s});
 
-&usage() if ($#ARGV == -1);
-&init();
+my $apfile = "";
+my $sifile = "";
+my $sitelen = 19;
+my $threshold = 0.000;
+my $gcp = 0;
+my $nx4 = 0;
+my $dsseopt = 0;
+my $combinesites = 0;
+my $output_file = "";
+
+#&usage() if ($#ARGV == -1);
+
 
 if (!$opt{o}) {
   die "Error: you must specify an output file!";
-} else {
-  $output_file = $opt{0};
+} 
+else {
+ print $opt{o};
+   $output_file = $opt{o};
 }
 open(OUTPUTFILE, '>', $output_file) or die("could not open $output_file for output.\n");
 
@@ -79,13 +92,13 @@ while (<SIRNA>) {
   last if (/---------------------/);
 }
 
-@dsse = ();
+my @dsse = ();
 # the first window in sirna.out starts at position 3.
 # so here we set windows at positions 1 and 2 to some
 # small values so that they won't get through the
 # filters
 $dsse[1] = $dsse[2] = -999;
-$idx = -1;
+my $idx = -1;
 while (<SIRNA>) {
   chomp;
   next if (/^\s*$/);
@@ -131,7 +144,7 @@ while (<SSTRAND>) {
 }
 close(SSTRAND);
 
-$nwin = $seqlen - $sitelen + 1;
+my $nwin = $seqlen - $sitelen + 1;
 $seq =~ tr/atcgun/ATCGUN/;
 $seq =~ tr/T/U/;
 
@@ -144,11 +157,11 @@ if ($DEBUG) {
   print STDERR " Number of $sitelen nt-long windows = $nwin\n";
 }
 
-@spos = ();
-%sites = ();
-%avgprob = ();
-%percent_gc = ();
-%site_dsse = ();
+my @spos = ();
+my %sites = ();
+my %avgprob = ();
+my %percent_gc = ();
+my %site_dsse = ();
 for (my $i=1; $i<=$nwin; $i++) {
   my($thiswin) = substr($seq, $i-1, $sitelen);
 
@@ -189,8 +202,8 @@ if ($combinesites) {
   # we try to eliminate "duplicate" sites here...
 
   # locate all peaks above the threshold probability
-  @pstart = ();
-  @pend = ();
+  my @pstart = ();
+  my @pend = ();
   my($prev) = &max(0, $uprob[1]-$threshold);
   if ($prev > 0) {
     push @pstart, 1;
@@ -229,7 +242,7 @@ if ($combinesites) {
   # arrays. we are sorting first by the difference (large 
   # to small), then by pstart (small to large).
   #
-  @sorted_ind = sort { (($pend[$b]-$pstart[$b]) <=> ($pend[$a]-$pstart[$a]))
+  my @sorted_ind = sort { (($pend[$b]-$pstart[$b]) <=> ($pend[$a]-$pstart[$a]))
                     || ($pstart[$a] <=> $pstart[$b]) } 0..$#pstart;
   @pstart = @pstart[@sorted_ind];
   @pend = @pend[@sorted_ind];
@@ -240,11 +253,11 @@ if ($combinesites) {
   #
 
   %pincluded = ();
-  foreach my $i (@pstart) {
+  foreach  $i (@pstart) {
     $pincluded{$i} = 0;
   }
   %sincluded = ();
-  foreach $i (@spos) {
+  foreach  $i (@spos) {
     $sincluded{$i} = 0;
   }
 
@@ -301,6 +314,43 @@ if ($combinesites) {
 
 }
 
+print OUTPUTFILE <<EndOfHeader;
+~~~~~~~~~~~~~~~~Filtered output for siRNAs with disruption energy~~~~~~~~~~~~~~~~~
+
+Column 1: starting target position
+Column 2: ending target position
+Column 3: sense siRNA (5p --> 3p)
+Column 4: antisense siRNA (5p --> 3p)
+Column 5: siRNA GC content
+Column 6: differential stability of siRNA duplex ends (DSSE, in kcal/mol)
+Column 7: average unpaired probability for target site nucleotides
+Column 8: binding site disruption energy (kcal/mol)
+
+FILTER CRITERIA: ("<=": less than or equal to)
+                 (">=": greater than or equal to)
+                 ( ">": greater than)
+
+ A) 30% <= GC % <= 70%;
+ B) Exclusion of target sequence with at least one of AAAA,
+    CCCC, GGGG, or UUUU;
+ C) DSSE > -1 kcal/mol (asymmetry rule);
+ D) Average unpaired probability for target site nucleotides >= $uprob;
+ E) For each peak in the accessibility profile that is above the threshold
+    probability, all sites targeted to this same peak are
+    ranked by their average unpaired probability (the higher the better) and
+    at most n sites are selected for each peak, where n is determined by
+    max([width of peak/site length], 2);
+ F) Among sites satisfying criteria A-E, the top unique ones with
+    the highest average unpaired probability are listed.
+
+NOTE:
+ i) The average unpaired probability is used in filter criteria D, E and F to
+    cut down the number of reported sites in order to make the disruption
+    energy calculation manageable on our web servers.
+--------------------------------------------------------------------------------
+
+EndOfHeader
+
 foreach $i (@spos) {
   if (($combinesites && $sincluded{$i}==1) || $combinesites==0) {
     printf(OUTPUTFILE "%5d  %s  %.3f  %5.1f%%  %5.1f\n", $i, $sites{$i}, $avgprob{$i},
@@ -309,19 +359,6 @@ foreach $i (@spos) {
 }
 
 exit;
-
-
-#
-# Command line options processing
-#
-sub init()
-{
-    use Getopt::Std;
-    my $opt_string = 'cdghi:l:ps:t:o:';
-    getopts( "$opt_string", \%opt ) or usage();
-
-    usage() if ($opt{h});
-}
 
 
 # return the larger of the two input values
