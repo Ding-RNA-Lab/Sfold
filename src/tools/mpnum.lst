@@ -1,0 +1,8 @@
+STATISTIC                    Fri Mar 12 17:09:06 2010                    page 1
+
+
+Date:     Fri Mar 12 17:09:06 2010
+Options:  -c -g -m64 -xcheck=stkovf -g -e -u -XlistE -C 
+Files:         1
+Lines:        40
+Routines:      1 (No MAIN; Subroutines: 1)

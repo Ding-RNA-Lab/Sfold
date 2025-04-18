@@ -1,0 +1,20 @@
+data.f                     Fri Mar 12 17:09:07 2010                     page 1
+
+FILE  "./data.f"
+subroutine  data
+   305            read (16, 12) c
+                                ^
+**** WAR  #320:  variable "c" set but never referenced
+   655            read (19, 191) a1
+                                 ^
+**** WAR  #320:  variable "a1" set but never referenced
+STATISTIC                    Fri Mar 12 17:09:07 2010                    page 2
+
+
+Date:     Fri Mar 12 17:09:07 2010
+Options:  -c -g -m64 -xcheck=stkovf -g -e -u -XlistE -C 
+Files:         1
+Lines:       762
+Commons:      21
+Routines:      2 (No MAIN; Subroutines: 1; Functions: 1)
+Messages:      2 (Warnings: 2)
